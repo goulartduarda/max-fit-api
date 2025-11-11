@@ -1,29 +1,30 @@
-# ----- Estágio 1: O Construtor (Builder) -----
-# Usamos uma imagem que já tem Maven e o JDK 17
-FROM maven:3.9-eclipse-temurin-17 AS builder
-
-# Define o diretório de trabalho
+# =========================
+# Stage 1: Build (Maven + JDK 17)
+# =========================
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# Copia o pom.xml e baixa as dependências (isso acelera builds futuros)
+# Baixa dependências primeiro (cache mais eficiente)
 COPY pom.xml .
-RUN mvn dependency:go-offline
+RUN mvn -q -DskipTests dependency:go-offline
 
-# Copia o resto do código-fonte e constrói o projeto
+# Copia o código e compila
 COPY src ./src
-RUN mvn clean package -DskipTests
+RUN mvn -q -DskipTests clean package
 
-# ----- Estágio 2: O Corredor (Runner) -----
-# Começamos de uma imagem limpa, apenas com o JRE (menor)
+# =========================
+# Stage 2: Runtime (JRE 17)
+# =========================
 FROM eclipse-temurin:17-jre-jammy
-
 WORKDIR /app
 
-# Copia o .jar que foi construído no Estágio 1
-COPY --from=builder /app/target/properties-1.0.0.jar app.jar
+# Copia o .jar gerado (qualquer nome)
+COPY --from=build /app/target/*.jar app.jar
 
-# Expõe a porta que o Render vai usar (ele lê a ${PORT})
-EXPOSE 10000
+# Porta padrão da imagem (Render injeta $PORT em runtime)
+ENV PORT=8080
+EXPOSE 8080
 
-# Comando para rodar a aplicação
-CMD ["java", "-jar", "app.jar"]
+# Permite passar flags opcionais via JAVA_OPTS (ex: -Xms128m -Xmx512m)
+# Usa a porta dinâmica do Render
+ENTRYPOINT ["sh", "-c", "java -Dserver.port=${PORT} ${JAVA_OPTS} -jar app.jar"]
