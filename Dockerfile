@@ -1,29 +1,26 @@
 # =========================
-# Etapa 1: Build (Maven + JDK 17)
+# Stage 1: Build (Maven + JDK 17)
 # =========================
 FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# Copia o pom.xml e baixa dependências (melhora cache do build)
 COPY pom.xml .
-RUN mvn dependency:go-offline -B
+RUN mvn -q -DskipTests dependency:go-offline
 
-# Copia o restante do código e empacota o projeto
 COPY src ./src
-RUN mvn clean package -DskipTests
+RUN mvn -q -DskipTests clean package
 
 # =========================
-# Etapa 2: Runtime (JRE 17)
+# Stage 2: Runtime (JRE 17)
 # =========================
 FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 
-# Copia o .jar gerado (qualquer nome de jar)
 COPY --from=build /app/target/*.jar app.jar
 
-# Render define a variável PORT automaticamente
-ENV PORT=8080
-EXPOSE 8080
+# Render (Docker) expõe tráfego na 10000. Faça a app escutar nela.
+ENV PORT=10000
+EXPOSE 10000
 
-# Executa a aplicação usando a porta dinâmica do Render
+# Força o Spring a escutar na 10000 (0.0.0.0)
 ENTRYPOINT ["sh", "-c", "java -Dserver.port=${PORT} -jar app.jar"]
