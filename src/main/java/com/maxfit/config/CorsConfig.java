@@ -14,7 +14,7 @@ public class CorsConfig implements WebMvcConfigurer {
                 // ✅ Domínio do front (Netlify)
                 "https://neon-raindrop-7da3fc.netlify.app",
                 // ✅ Domínio da API (Render)
-                "https://max-fit-api-4bkb.onrender.com",
+                "https://max-fit-api-2.onrender.com",
                 // ✅ locais de teste (opcional)
                 "http://localhost:5500",
                 "http://127.0.0.1:5500"
