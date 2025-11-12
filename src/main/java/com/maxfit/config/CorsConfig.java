@@ -11,17 +11,15 @@ public class CorsConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
             .allowedOriginPatterns(
-                // ✅ seu site atual no Netlifys
+                // ✅ Domínio atual do front
                 "https://neon-raindrop-7da3fc.netlify.app",
-                // (opcional) outro domínio antigo seu
-                "https://cheerful-klepon-54ef0e.netlify.app",
-                // (opcional) páginas que você já usou
-                "https://maxfit-tcc.onrender.com",
-                // (opcional) para testes locais (Live Server)
+                // ✅ Domínio atual da API (Render)
+                "https://max-fit-api-4bkb.onrender.com",
+                // opcional: testes locais
                 "http://localhost:5500",
                 "http://127.0.0.1:5500"
             )
-            .allowedMethods("GET","POST","PUT","PATCH","DELETE","OPTIONS")
+            .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
             .allowedHeaders("*")
             .allowCredentials(true)
             .maxAge(3600);
